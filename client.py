@@ -6,10 +6,11 @@ def get_msg():
     print("client:get_msg method")
     udp_socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     udp_socket.bind(("",13117))
     #self.udp_socket.settimeout(0.5)
-    message=""
-    while message=="":
+    message=None
+    while message is None:
         print('loop')
 
         try:
@@ -26,9 +27,10 @@ def start():
     print("Client started, listening for offer requests...")
     while 1: #wait for offers
         msg,addr=get_msg() #get msg and adress
+        print(f"Received offer from {addr[0]}, attempting to connect...")
         try: #verify what message recieved, if not good- continue
             msg2=struct.unpack("Ibh",msg)
-            if msg2[0] != 4276993775 or msg2[1] != 2 or msg2[2] < 1024 or msg2[2] > 32768:
+            if msg2[0] != 0xabcddcba or msg2[1] != 2 or msg2[2] < 1024 or msg2[2] > 32768:
                 continue
         except:
             continue
