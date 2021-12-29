@@ -3,7 +3,6 @@ import struct
 import time
 import sys
 def get_msg():
-    print("client:get_msg method")
     udp_socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -11,7 +10,6 @@ def get_msg():
     #self.udp_socket.settimeout(0.5)
     message=None
     while message is None:
-        print('loop')
 
         try:
             udp_socket.settimeout(0.5)  
@@ -21,7 +19,6 @@ def get_msg():
     return message
 
 def start():
-    print("client:start method")
 
     #starting the client
     print("Client started, listening for offer requests...")
@@ -44,7 +41,6 @@ def start():
 
 
 def tcp_connection(addr,port):
-    print("client:tcp_connection method")
 
     ip,_=addr
     tcp_socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -58,8 +54,6 @@ def tcp_connection(addr,port):
     
 
 def start_game(tcp_socket):
-    print("client:start_game method")
-
 
     #start=time.time()
     try:
