@@ -3,6 +3,7 @@ import threading
 import struct
 import time
 import random
+import concurrent
 class server:
     def __init__(self):
         self.port=2031
@@ -15,7 +16,7 @@ class server:
         self.teams=[]
         self.udp_port=13117
         self.buffer=1024
-        self.develop_net ="172.1.255.255" #socket.gethostbyname(socket.gethostname())
+        self.develop_net =socket.gethostbyname(socket.gethostname())#"172.1.255.255" 
 
     
     def start_broadcast(self):
@@ -108,16 +109,9 @@ if __name__=='__main__':
             
             for player in s.teams:
                 player[0].send(bytes(welcome,'utf-8'))
-                
             print(welcome)
-
-
-            
-            
-
+        with concurrent.futures.ThreadPoolExecutor(2) as threads_pool:
+            res=[]
+            for player in s.teams:
+                res.append(threads_pool.submit(s.game,player[0]))
         
-
-
-
-
-
