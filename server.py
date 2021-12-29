@@ -4,6 +4,7 @@ import struct
 import time
 import random
 import concurrent
+
 class server:
     def __init__(self):
         self.port=2031
@@ -12,15 +13,15 @@ class server:
         self.tcp_socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.udp_socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) 
         self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        #self.udp_socket.bind('localhost',13117) #check!!!
+        #self.tcp_socket.bind('localhost',2031) #check!!!
         self.teams=[]
         self.udp_port=13117
         self.buffer=1024
-        self.develop_net =socket.gethostbyname(socket.gethostname())#"172.1.255.255" 
+        self.develop_net = "172.1.255.255"
+        #self.develop_net = socket.gethostbyname(socket.gethostname()) 
 
     
     def start_broadcast(self):
-        print(f"server: start_broadcast method, IP {self.IP}")
 
         threading.Timer(1.0,self.start_broadcast).start()
         msg = struct.pack("Ibh",0xabcddcba,0x2,self.port)
@@ -28,9 +29,9 @@ class server:
         #msg="hello world".encode()
         #addr=(self.develop_net,self.udp_port)
         #self.udp_socket.sendto(msg,addr)
-
+        client,address=self.tcp_socket.accept()
+        return client,address
     def wait_for_clients(self):
-        print("server: wait_for_clients method")
 
         thread=threading.Thread(target=self.start_broadcast)
         thread.start()
@@ -39,7 +40,7 @@ class server:
                 print(f"{self.teams[0][2]} entered")
             self.tcp_socket.settimeout(0.1)
             try:
-                client,address=self.tcp_socket.accept()
+                #client,address=self.tcp_socket.accept()
                 group_name=client.recv(self.buffersize).decode("utf-8")
                 tup=(client,address,group_name)
                 self.teams.append(tup)
@@ -49,14 +50,8 @@ class server:
         self.game()
     
     def game(self,client):
-        print("server: game method")
         time.sleep(10)
         self.tcp_socket.listen()
-
-
-
-
-        
 
 
     def start(self):
@@ -114,4 +109,25 @@ if __name__=='__main__':
             res=[]
             for player in s.teams:
                 res.append(threads_pool.submit(s.game,player[0]))
-        
+            first_group_res=res[0]
+            second_group_res=res[1]
+            if first_group_res==QA.get(question):
+                winner=s.teams[0][2]
+            elif second_group_res==QA.get(question):
+                winner=s.teams[1][2]
+            else:
+                winner="Draw"
+            
+            conclude_msg=f"Game over!\nThe correct answer was{QA.get(question)}\n\nCongratulations to the winner: {winner}"
+            print(conclude_msg)
+            for player in s.teams:
+                try:
+                    player[0].send(bytes(conclude_msg,'utf-8'))
+                except:
+                    continue
+            for player in s.teams:
+                try:
+                    player[0].close()
+                except:
+                    continue
+            print("Game over, sending out offer requests...")
